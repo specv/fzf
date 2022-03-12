@@ -46,12 +46,23 @@ __fsel() {
     -o -type l -print 2> /dev/null | cut -b3-"}"
   setopt localoptions pipefail no_aliases 2> /dev/null
   local item
-  eval "$cmd" | FZF_DEFAULT_OPTS="--height ${FZF_TMUX_HEIGHT:-40%} --reverse --bind=ctrl-z:ignore $FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS" $(__fzfcmd) -m "$@" | while read item; do
-    echo -n "${(q)item} "
+  local accept=0
+  eval "$cmd" | FZF_DEFAULT_OPTS="--height ${FZF_TMUX_HEIGHT:-40%} --reverse --bind=ctrl-z:ignore --expect=ctrl-f --expect=ctrl-g $FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS" $(__fzfcmd) -m "$@" | while read item; do
+    if [[ $item = ctrl-f ]]; then
+    elif [[ $item = ctrl-g ]]; then
+      accept=1
+    # enter key
+    elif [[ -z "$item" ]]; then
+      accept=1
+    else
+      # q for quoting
+      # https://zsh.sourceforge.io/Doc/Release/Expansion.html
+      echo -n "${(q)item} "
+    fi
   done
   local ret=$?
   echo
-  return $ret
+  return accept
 }
 
 __fzfcmd() {
@@ -61,14 +72,17 @@ __fzfcmd() {
 
 fzf-file-widget() {
   LBUFFER="${LBUFFER}$(__fsel)"
-  local ret=$?
+  local accept=$?
   zle reset-prompt
-  return $ret
+  if [[ $accept = 1 ]]; then
+    zle accept-line
+  fi
+  return 0
 }
 zle     -N            fzf-file-widget
-bindkey -M emacs '^T' fzf-file-widget
-bindkey -M vicmd '^T' fzf-file-widget
-bindkey -M viins '^T' fzf-file-widget
+bindkey -M emacs '^O' fzf-file-widget
+bindkey -M vicmd '^O' fzf-file-widget
+bindkey -M viins '^O' fzf-file-widget
 
 # ALT-C - cd into the selected directory
 fzf-cd-widget() {
