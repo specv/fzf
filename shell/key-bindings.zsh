@@ -57,7 +57,7 @@ __fsel() {
     else
       # q for quoting
       # https://zsh.sourceforge.io/Doc/Release/Expansion.html
-      echo -n "${(q)item} "
+      echo -n "${EDITOR} ${(q)item}"
     fi
   done
   local ret=$?
