@@ -40,11 +40,11 @@ fi
 
 # CTRL-T - Paste the selected file path(s) into the command line
 __fsel() {
-  local cmd="${FZF_CTRL_T_COMMAND:-"command fd -H -t f 2> /dev/null | cut -b3-"}"
+  local cmd="${FZF_CTRL_T_COMMAND:-"command fd -H -t f 2> /dev/null | cut -b3- | lscolors"}"
   setopt localoptions pipefail no_aliases 2> /dev/null
   local item
   local accept=0
-  eval "$cmd" | FZF_DEFAULT_OPTS="--height ${FZF_TMUX_HEIGHT:-40%} --reverse --bind=ctrl-z:ignore --expect=ctrl-f --expect=ctrl-g $FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS" $(__fzfcmd) -m "$@" | while read item; do
+  eval "$cmd" | FZF_DEFAULT_OPTS="--height ${FZF_TMUX_HEIGHT:-40%} --ansi --reverse --bind=ctrl-z:ignore --expect=ctrl-f --expect=ctrl-g $FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS" $(__fzfcmd) -m "$@" | while read item; do
     if [[ $item = ctrl-f ]]; then
     elif [[ $item = ctrl-g ]]; then
       accept=1
@@ -83,12 +83,12 @@ bindkey -M viins '^O' fzf-file-widget
 
 # ALT-C - cd into the selected directory
 fzf-cd-widget() {
-  local cmd="${FZF_ALT_C_COMMAND:-"command fd -H -t d 2> /dev/null | cut -b3-"}"
+  local cmd="${FZF_ALT_C_COMMAND:-"command fd -H -t d 2> /dev/null | cut -b3- | lscolors"}"
   setopt localoptions pipefail no_aliases 2> /dev/null
   local dir
   local item
   local accept=0
-  eval "$cmd" | FZF_DEFAULT_OPTS="--height ${FZF_TMUX_HEIGHT:-40%} --reverse --bind=ctrl-z:ignore --expect=ctrl-f --expect=ctrl-g $FZF_DEFAULT_OPTS $FZF_ALT_C_OPTS" $(__fzfcmd) +m | while read item; do
+  eval "$cmd" | FZF_DEFAULT_OPTS="--height ${FZF_TMUX_HEIGHT:-40%} --ansi --reverse --bind=ctrl-z:ignore --expect=ctrl-f --expect=ctrl-g $FZF_DEFAULT_OPTS $FZF_ALT_C_OPTS" $(__fzfcmd) +m | while read item; do
   if [[ $item = ctrl-f ]]; then
   elif [[ $item = ctrl-g ]]; then
     accept=1
