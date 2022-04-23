@@ -40,7 +40,7 @@ fi
 
 # CTRL-T - Paste the selected file path(s) into the command line
 __fsel() {
-  local cmd="${FZF_CTRL_T_COMMAND:-"command fd -H -t f 2> /dev/null | cut -b3- | lscolors"}"
+  local cmd="${FZF_CTRL_T_COMMAND:-"command fd -H -t f -c always --strip-cwd-prefix 2> /dev/null"}"
   setopt localoptions pipefail no_aliases 2> /dev/null
   local item
   local accept=0
@@ -83,7 +83,7 @@ bindkey -M viins '^O' fzf-file-widget
 
 # ALT-C - cd into the selected directory
 fzf-cd-widget() {
-  local cmd="${FZF_ALT_C_COMMAND:-"command fd -H -t d 2> /dev/null | cut -b3- | lscolors"}"
+  local cmd="${FZF_ALT_C_COMMAND:-"command fd -H -t d -c always --strip-cwd-prefix 2> /dev/null"}"
   setopt localoptions pipefail no_aliases 2> /dev/null
   local dir
   local item
