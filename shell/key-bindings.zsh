@@ -160,7 +160,7 @@ bindkey -M viins '^R' fzf-history-widget
 fzf-rg() {
   RG_PREFIX="rg --files-with-matches"
   local file
-  file="$( eval $RG_PREFIX ${(qqq)LBUFFER} | fzf --sort --preview="[[ ! -z {} ]] && rg --line-number --pretty --context 10 {q} {}" --phony --query=${LBUFFER} --bind "change:reload:$RG_PREFIX {q}" --preview-window="70%:wrap" )" && echo -n "${EDITOR} ${(qqq)file}"
+  file="$( eval $RG_PREFIX ${(qqq)LBUFFER} | lscolors | fzf --sort --ansi --preview="[[ ! -z {} ]] && rg --line-number --pretty --context 10 {q} {}" --phony --query=${LBUFFER} --bind "change:reload:$RG_PREFIX {q} | lscolors" --preview-window="70%:wrap" )" && echo -n "${EDITOR} ${(qqq)file}"
 }
 zle     -N            fzf-rg
 bindkey -M emacs '^O' fzf-rg
