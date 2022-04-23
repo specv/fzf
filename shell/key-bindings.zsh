@@ -77,9 +77,9 @@ fzf-file-widget() {
   return 0
 }
 zle     -N            fzf-file-widget
-bindkey -M emacs '^I' fzf-file-widget
-bindkey -M vicmd '^I' fzf-file-widget
-bindkey -M viins '^I' fzf-file-widget
+bindkey -M emacs '^O' fzf-file-widget
+bindkey -M vicmd '^O' fzf-file-widget
+bindkey -M viins '^O' fzf-file-widget
 
 # ALT-C - cd into the selected directory
 fzf-cd-widget() {
@@ -191,6 +191,6 @@ fzf-rg() {
 }
 
 zle     -N            fzf-rg
-bindkey -M emacs '^O' fzf-rg
-bindkey -M vicmd '^O' fzf-rg
-bindkey -M viins '^O' fzf-rg
+bindkey -M emacs '^E' fzf-rg
+bindkey -M vicmd '^E' fzf-rg
+bindkey -M viins '^E' fzf-rg
