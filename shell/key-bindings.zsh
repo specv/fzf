@@ -77,9 +77,9 @@ fzf-file-widget() {
   return 0
 }
 zle     -N            fzf-file-widget
-bindkey -M emacs '^O' fzf-file-widget
-bindkey -M vicmd '^O' fzf-file-widget
-bindkey -M viins '^O' fzf-file-widget
+bindkey -M emacs '^I' fzf-file-widget
+bindkey -M vicmd '^I' fzf-file-widget
+bindkey -M viins '^I' fzf-file-widget
 
 # ALT-C - cd into the selected directory
 fzf-cd-widget() {
@@ -113,7 +113,7 @@ done
   zle reset-prompt
   return $ret
 }
-zle     -N             fzf-cd-widget
+zle     -N            fzf-cd-widget
 bindkey -M emacs '^T' fzf-cd-widget
 bindkey -M vicmd '^T' fzf-cd-widget
 bindkey -M viins '^T' fzf-cd-widget
@@ -155,3 +155,14 @@ bindkey -M viins '^R' fzf-history-widget
   eval $__fzf_key_bindings_options
   'unset' '__fzf_key_bindings_options'
 }
+
+
+fzf-rg() {
+  RG_PREFIX="rg --files-with-matches"
+  local file
+  file="$( eval $RG_PREFIX ${(qqq)LBUFFER} | fzf --sort --preview="[[ ! -z {} ]] && rg --line-number --pretty --context 10 {q} {}" --phony --query=${LBUFFER} --bind "change:reload:$RG_PREFIX {q}" --preview-window="70%:wrap" )" && echo -n "${EDITOR} ${(qqq)file}"
+}
+zle     -N            fzf-rg
+bindkey -M emacs '^O' fzf-rg
+bindkey -M vicmd '^O' fzf-rg
+bindkey -M viins '^O' fzf-rg
