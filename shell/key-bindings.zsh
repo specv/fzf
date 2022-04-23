@@ -156,12 +156,40 @@ bindkey -M viins '^R' fzf-history-widget
   'unset' '__fzf_key_bindings_options'
 }
 
+__fzf-rg() {
+  RG_PREFIX="rg --files-with-matches"
+  local selected item
+  setopt localoptions pipefail no_aliases 2> /dev/null
+  selected=( $( eval $RG_PREFIX ${(qqq)LBUFFER} | lscolors | FZF_DEFAULT_OPTS="--height ${FZF_TMUX_HEIGHT:-50%} --ansi --sort --bind=ctrl-z:ignore,ctrl-u:preview-up,ctrl-d:preview-down --expect=ctrl-f --expect=ctrl-g" fzf --preview="[[ ! -z {} ]] && rg --line-number --pretty --context 10 {q} {}" --phony --query=${LBUFFER} --bind "change:reload:$RG_PREFIX {q} | lscolors" --preview-window="70%:wrap" ) )
+
+  local ret=$?
+  local accept=0
+  if [ -n "$selected" ]; then
+    if [[ $selected[1] = ctrl-f ]]; then
+      shift selected
+    fi
+    if [[ $selected[1] = ctrl-g ]]; then
+      accept=1
+      shift selected
+    fi
+    item=$selected[1]
+    echo -n "${EDITOR} ${(q)item}"
+  fi
+
+  echo
+  return accept
+}
 
 fzf-rg() {
-  RG_PREFIX="rg --files-with-matches"
-  local file
-  file="$( eval $RG_PREFIX ${(qqq)LBUFFER} | lscolors | FZF_DEFAULT_OPTS="--height ${FZF_TMUX_HEIGHT:-50%} --ansi --sort --bind=ctrl-z:ignore,ctrl-u:preview-up,ctrl-d:preview-down --expect=ctrl-f --expect=ctrl-g" fzf --preview="[[ ! -z {} ]] && rg --line-number --pretty --context 10 {q} {}" --phony --query=${LBUFFER} --bind "change:reload:$RG_PREFIX {q} | lscolors" --preview-window="70%:wrap" )" && echo -n "${EDITOR} ${(qqq)file}"
+  LBUFFER="${LBUFFER}$(__fzf-rg)"
+  local accept=$?
+  zle reset-prompt
+  if [[ $accept = 1 ]]; then
+    zle accept-line
+  fi
+  return 0
 }
+
 zle     -N            fzf-rg
 bindkey -M emacs '^O' fzf-rg
 bindkey -M vicmd '^O' fzf-rg
