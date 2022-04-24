@@ -160,7 +160,12 @@ __fzf-rg() {
   RG_PREFIX="rg --files-with-matches"
   local selected item
   setopt localoptions pipefail no_aliases 2> /dev/null
-  selected=( $( eval $RG_PREFIX ${(qqq)LBUFFER} | lscolors | FZF_DEFAULT_OPTS="--height ${FZF_TMUX_HEIGHT:-50%} --ansi --sort --bind=ctrl-z:ignore,ctrl-u:preview-up,ctrl-d:preview-down --expect=ctrl-f --expect=ctrl-g" fzf --preview="[[ ! -z {} ]] && rg --line-number --pretty --context 10 {q} {}" --phony --query=${LBUFFER} --bind "change:reload:$RG_PREFIX {q} | lscolors" --preview-window="70%:wrap" ) )
+  # TODO upgrade batgrep:
+  # --search-pattern
+  # --terminal-width=80 in fzf previewer always `$({ stty size 2>/dev/null || echo "22 80"; } | cut -d ' ' -f2)`
+  # https://github.com/eth-p/bat-extras/pull/55
+  # https://github.com/eth-p/bat-extras/pull/62
+  selected=( $( eval $RG_PREFIX ${(qqq)LBUFFER} | lscolors | FZF_DEFAULT_OPTS="--height ${FZF_TMUX_HEIGHT:-100%} --ansi --sort --bind=ctrl-z:ignore,ctrl-u:preview-up,ctrl-d:preview-down --expect=ctrl-f --expect=ctrl-g" fzf --preview="[[ ! -z {} ]] && if [[ -z {q} ]]; then bat --color=always {}; else (batgrep --paging=always --pager=less --color --context 10 -p {q} {}); fi" --phony --query=${LBUFFER} --bind "change:reload:$RG_PREFIX {q} | lscolors" --preview-window="up,60%,border-bottom,+{2}+3/3,~3" ) )
 
   local ret=$?
   local accept=0
