@@ -88,7 +88,7 @@ fzf-cd-widget() {
   local dir
   local item
   local accept=0
-  eval "$cmd" | FZF_DEFAULT_OPTS="--height ${FZF_TMUX_HEIGHT:-50%} --ansi --reverse --bind=ctrl-z:ignore,ctrl-u:preview-up,ctrl-d:preview-down --expect=ctrl-f --expect=ctrl-g $FZF_DEFAULT_OPTS $FZF_ALT_C_OPTS" $(__fzfcmd) +m --preview="[[ ! -z {} ]] && command fd -H -c always . {} 2> /dev/null" --preview-window="50%:wrap" | while read item; do
+  eval "$cmd" | FZF_DEFAULT_OPTS="--height ${FZF_TMUX_HEIGHT:-50%} --ansi --reverse --bind=ctrl-z:ignore,ctrl-u:preview-up,ctrl-d:preview-down --expect=ctrl-f --expect=ctrl-g $FZF_DEFAULT_OPTS $FZF_ALT_C_OPTS" $(__fzfcmd) +m --preview="[[ ! -z {} ]] && command fd -H -c always . {} 2> /dev/null | sed 's;{}/;;'" --preview-window="50%:wrap" | while read item; do
   if [[ $item = ctrl-f ]]; then
   elif [[ $item = ctrl-g ]]; then
     accept=1
