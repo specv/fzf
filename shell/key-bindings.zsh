@@ -44,7 +44,7 @@ __fsel() {
   setopt localoptions pipefail no_aliases 2> /dev/null
   local item
   local accept=0
-  eval "$cmd" | FZF_DEFAULT_OPTS="--height ${FZF_TMUX_HEIGHT:-50%} --ansi --reverse --bind=ctrl-z:ignore,ctrl-u:preview-half-page-up,ctrl-d:preview-half-page-down --expect=ctrl-f --expect=ctrl-g $FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS" $(__fzfcmd) -m "$@" --preview="[[ ! -z {} ]] && bat --color=always --style=numbers {}" --preview-window="50%:wrap" | while read item; do
+  eval "$cmd" | FZF_DEFAULT_OPTS="--height ${FZF_TMUX_HEIGHT:-50%} --ansi --reverse --query=${(qqq)LBUFFER} --bind=ctrl-z:ignore,ctrl-u:preview-half-page-up,ctrl-d:preview-half-page-down --expect=ctrl-f --expect=ctrl-g $FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS" $(__fzfcmd) -m "$@" --preview="[[ ! -z {} ]] && bat --color=always --style=numbers {}" --preview-window="50%:wrap" | while read item; do
     if [[ $item = ctrl-f ]]; then
     elif [[ $item = ctrl-g ]]; then
       accept=1
@@ -68,7 +68,7 @@ __fzfcmd() {
 }
 
 fzf-file-widget() {
-  LBUFFER="${LBUFFER}$(__fsel)"
+  LBUFFER="$(__fsel)"
   local accept=$?
   zle reset-prompt
   if [[ $accept = 1 ]]; then
@@ -88,7 +88,7 @@ fzf-cd-widget() {
   local dir
   local item
   local accept=0
-  eval "$cmd" | FZF_DEFAULT_OPTS="--height ${FZF_TMUX_HEIGHT:-50%} --ansi --reverse --bind=ctrl-z:ignore,ctrl-u:preview-half-page-up,ctrl-d:preview-half-page-down --expect=ctrl-f --expect=ctrl-g $FZF_DEFAULT_OPTS $FZF_ALT_C_OPTS" $(__fzfcmd) +m --preview="[[ ! -z {} ]] && command fd -H -c always . {} 2> /dev/null | sed 's;{}/;;'" --preview-window="50%:wrap" | while read item; do
+  eval "$cmd" | FZF_DEFAULT_OPTS="--height ${FZF_TMUX_HEIGHT:-50%} --ansi --reverse --query=${(qqq)LBUFFER} --bind=ctrl-z:ignore,ctrl-u:preview-half-page-up,ctrl-d:preview-half-page-down --expect=ctrl-f --expect=ctrl-g $FZF_DEFAULT_OPTS $FZF_ALT_C_OPTS" $(__fzfcmd) +m --preview="[[ ! -z {} ]] && command fd -H -c always . {} 2> /dev/null | sed 's;{}/;;'" --preview-window="50%:wrap" | while read item; do
   if [[ $item = ctrl-f ]]; then
   elif [[ $item = ctrl-g ]]; then
     accept=1
@@ -165,7 +165,7 @@ __fzf-rg() {
   # --terminal-width=80 in fzf previewer always `$({ stty size 2>/dev/null || echo "22 80"; } | cut -d ' ' -f2)`
   # https://github.com/eth-p/bat-extras/pull/55
   # https://github.com/eth-p/bat-extras/pull/62
-  selected=( $( eval $RG_PREFIX ${(qqq)LBUFFER} | lscolors | FZF_DEFAULT_OPTS="--height ${FZF_TMUX_HEIGHT:-100%} --ansi --sort --bind=ctrl-z:ignore,ctrl-u:preview-half-page-up,ctrl-d:preview-half-page-down --expect=ctrl-f --expect=ctrl-g" fzf --preview="[[ ! -z {} ]] && if [[ -z {q} ]]; then bat --color=always {}; else (batgrep --smart-case --paging=always --pager=less --color --context 10 -p {q} {}); fi" --phony --query=${LBUFFER} --bind "change:reload:$RG_PREFIX {q} | lscolors" --preview-window="up,60%,border-bottom,+{2}+3/3,~3" ) )
+  selected=( $( eval $RG_PREFIX ${(qqq)LBUFFER} | lscolors | FZF_DEFAULT_OPTS="--height ${FZF_TMUX_HEIGHT:-100%} --ansi --sort --bind=ctrl-z:ignore,ctrl-u:preview-half-page-up,ctrl-d:preview-half-page-down --expect=ctrl-f --expect=ctrl-g" fzf --preview="[[ ! -z {} ]] && if [[ -z {q} ]]; then bat --color=always {}; else (batgrep --smart-case --paging=always --pager=less --color --context 10 -p {q} {}); fi" --phony --query="${LBUFFER}" --bind "change:reload:$RG_PREFIX {q} | lscolors" --preview-window="up,60%,border-bottom,+{2}+3/3,~3" ) )
 
   local ret=$?
   local accept=0
@@ -186,7 +186,7 @@ __fzf-rg() {
 }
 
 fzf-rg() {
-  LBUFFER="${LBUFFER}$(__fzf-rg)"
+  LBUFFER="$(__fzf-rg)"
   local accept=$?
   zle reset-prompt
   if [[ $accept = 1 ]]; then
