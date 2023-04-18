@@ -177,8 +177,7 @@ __fzf-rg() {
       accept=1
       shift selected
     fi
-    item=$selected[1]
-    echo -n "${EDITOR} ${(q)item}"
+    echo -n "${EDITOR} ${(q)selected}"
   fi
 
   echo
