@@ -158,14 +158,10 @@ bindkey -M viins '^R' fzf-history-widget
 
 __fzf-rg() {
   RG_PREFIX="rg --files-with-matches --smart-case"
+  TERMINAL_WIDTH=$({ stty size < /dev/tty } | cut -d ' ' -f2)
   local selected item
   setopt localoptions pipefail no_aliases 2> /dev/null
-  # TODO upgrade batgrep:
-  # --search-pattern
-  # --terminal-width=80 in fzf previewer always `$({ stty size 2>/dev/null || echo "22 80"; } | cut -d ' ' -f2)`
-  # https://github.com/eth-p/bat-extras/pull/55
-  # https://github.com/eth-p/bat-extras/pull/62
-  selected=( $( eval $RG_PREFIX ${(qqq)LBUFFER} | lscolors | FZF_DEFAULT_OPTS="--height ${FZF_TMUX_HEIGHT:-100%} --ansi --sort --bind=ctrl-z:ignore,ctrl-u:preview-half-page-up,ctrl-d:preview-half-page-down --expect=ctrl-f --expect=ctrl-g" fzf --preview="[[ ! -z {} ]] && if [[ -z {q} ]]; then bat --color=always {}; else (batgrep --smart-case --paging=always --pager=less --color --context 10 -p {q} {}); fi" --phony --query="${LBUFFER}" --bind "change:reload:$RG_PREFIX {q} | lscolors" --preview-window="up,60%,border-bottom,+{2}+3/3,~3" ) )
+  selected=( $( eval $RG_PREFIX ${(qqq)LBUFFER} | lscolors | BAT_STYLE=numbers FZF_DEFAULT_OPTS="--height ${FZF_TMUX_HEIGHT:-100%} --ansi --sort --bind=ctrl-z:ignore,ctrl-u:preview-half-page-up,ctrl-d:preview-half-page-down --expect=ctrl-f --expect=ctrl-g" fzf --preview="[[ ! -z {} ]] && if [[ -z {q} ]]; then bat --color=always --style=numbers {}; else (batgrep --terminal-width=${TERMINAL_WIDTH} --no-separator --smart-case --paging=always --pager=less --color --context 10 -p {q} {}); fi" --phony --query="${LBUFFER}" --bind "change:reload:$RG_PREFIX {q} | lscolors" --preview-window="up,60%,border-bottom,+{2}+3/3,~3" ) )
 
   local ret=$?
   local accept=0
@@ -195,6 +191,6 @@ fzf-rg() {
 }
 
 zle     -N            fzf-rg
-bindkey -M emacs '^E' fzf-rg
-bindkey -M vicmd '^E' fzf-rg
-bindkey -M viins '^E' fzf-rg
+bindkey -M emacs '^S' fzf-rg
+bindkey -M vicmd '^S' fzf-rg
+bindkey -M viins '^S' fzf-rg
