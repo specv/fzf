@@ -161,19 +161,24 @@ __fzf-rg() {
   TERMINAL_WIDTH=$({ stty size < /dev/tty } | cut -d ' ' -f2)
   local selected item
   setopt localoptions pipefail no_aliases 2> /dev/null
-  selected=( $( eval $RG_PREFIX ${(qqq)LBUFFER} | lscolors | BAT_STYLE=numbers FZF_DEFAULT_OPTS="--height ${FZF_TMUX_HEIGHT:-100%} --ansi --sort --bind=ctrl-z:ignore,ctrl-u:preview-half-page-up,ctrl-d:preview-half-page-down --expect=ctrl-f --expect=ctrl-g" fzf --preview="[[ ! -z {} ]] && if [[ -z {q} ]]; then bat --color=always --style=numbers {}; else (batgrep --terminal-width=${TERMINAL_WIDTH} --no-separator --smart-case --paging=always --pager=less --color --context 10 -p {q} {}); fi" --phony --query="${LBUFFER}" --bind "change:reload:$RG_PREFIX {q} | lscolors" --preview-window="up,60%,border-bottom,+{2}+3/3,~3" ) )
-
-  local ret=$?
+  selected=$( eval $RG_PREFIX ${(qqq)LBUFFER} | lscolors | BAT_STYLE=numbers FZF_DEFAULT_OPTS="--height ${FZF_TMUX_HEIGHT:-100%} --ansi --sort --bind=ctrl-z:ignore,ctrl-u:preview-half-page-up,ctrl-d:preview-half-page-down --expect=ctrl-f --expect=ctrl-g" fzf --print-query --preview="[[ ! -z {} ]] && if [[ -z {q} ]]; then bat --color=always --style=numbers {}; else (batgrep --terminal-width=${TERMINAL_WIDTH} --no-separator --smart-case --paging=always --pager=less --color --context 10 -p {q} {}); fi" --phony --query="${LBUFFER}" --bind "change:reload:$RG_PREFIX {q} | lscolors" --preview-window="up,60%,border-bottom,+{2}+3/3,~3" )
+  selected=("${(@f)$(echo $selected)}")
+  
+  local q=$selected[1]
+  local key=$selected[2]
+  local path=$selected[3]
   local accept=0
-  if [ -n "$selected" ]; then
-    if [[ $selected[1] = ctrl-f ]]; then
-      shift selected
-    fi
-    if [[ $selected[1] = ctrl-g ]]; then
+  
+  if [ -n "$path" ]; then
+    if [[ $key = ctrl-g ]]; then
       accept=1
-      shift selected
     fi
-    echo -n "${EDITOR} ${(q)selected}"
+
+    if [ -n "$q" ]; then
+      echo -n "${EDITOR} -c /${(q)q} ${(q)path}"
+    else
+      echo -n "${EDITOR} ${(q)path}"
+    fi
   fi
 
   echo
