@@ -114,9 +114,9 @@ done
   return $ret
 }
 zle     -N            fzf-cd-widget
-bindkey -M emacs '^T' fzf-cd-widget
-bindkey -M vicmd '^T' fzf-cd-widget
-bindkey -M viins '^T' fzf-cd-widget
+bindkey -M emacs '^P' fzf-cd-widget
+bindkey -M vicmd '^P' fzf-cd-widget
+bindkey -M viins '^P' fzf-cd-widget
 
 # CTRL-R - Paste the selected command from history into the command line
 # History direct output: https://github.com/junegunn/fzf/issues/477
@@ -166,7 +166,6 @@ bindkey -M viins '^R' fzf-history-widget
 }
 
 __fzf-rg() {
-  RG_PREFIX="rg --files-with-matches --smart-case"
   TERMINAL_WIDTH=$({ stty size < /dev/tty } | cut -d ' ' -f2)
   local selected item
   setopt localoptions pipefail no_aliases 2> /dev/null
@@ -183,7 +182,9 @@ __fzf-rg() {
       accept=1
     fi
 
-    if [ -n "$q" ]; then
+    if [[ "$EDITOR" == "open" ]]; then
+      echo -n "${EDITOR} ${(q)path}"
+    elif [ -n "$q" ]; then
       echo -n "${EDITOR} -c /${(q)q} ${(q)path}"
     else
       echo -n "${EDITOR} ${(q)path}"
@@ -195,7 +196,7 @@ __fzf-rg() {
 }
 
 fzf-rg() {
-  LBUFFER="$(__fzf-rg)"
+  LBUFFER="$(RG_PREFIX='rg --hidden --files-with-matches --smart-case' __fzf-rg)"
   local accept=$?
   zle reset-prompt
   if [[ $accept = 1 ]]; then
@@ -205,6 +206,21 @@ fzf-rg() {
 }
 
 zle     -N            fzf-rg
-bindkey -M emacs '^S' fzf-rg
-bindkey -M vicmd '^S' fzf-rg
-bindkey -M viins '^S' fzf-rg
+bindkey -M emacs '^T' fzf-rg
+bindkey -M vicmd '^T' fzf-rg
+bindkey -M viins '^T' fzf-rg
+
+fzf-rga() {
+  LBUFFER="$(EDITOR='open' RG_PREFIX='rga --hidden --files-with-matches --smart-case' __fzf-rg)"
+  local accept=$?
+  zle reset-prompt
+  if [[ $accept = 1 ]]; then
+    zle accept-line
+  fi
+  return 0
+}
+
+zle     -N            fzf-rga
+bindkey -M emacs '^S' fzf-rga
+bindkey -M vicmd '^S' fzf-rga
+bindkey -M viins '^S' fzf-rga
